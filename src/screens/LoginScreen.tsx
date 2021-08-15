@@ -1,16 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Input, Image, Button } from "react-native-elements";
+import React, { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { Button, Image, Input } from "react-native-elements";
 import { RootStackParamList } from "../../App";
+import { auth } from "../firebase";
 
 type ILoginScreen = StackNavigationProp<RootStackParamList, "LoginScreen">;
 
@@ -19,7 +14,19 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const navigation = useNavigation<ILoginScreen>();
 
-  const signIn = () => {};
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((res) => {
+      if (res) {
+        navigation.replace("HomeScreen");
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const signIn = () => {
+    auth.signInWithEmailAndPassword(email, password).catch((err) => alert(err));
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
